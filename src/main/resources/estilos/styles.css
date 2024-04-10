@@ -1,0 +1,13 @@
+.vbox-marco {
+    -fx-border-color: black;
+    -fx-border-width: 2px;
+    -fx-padding: 10px; /* Espacio interno */
+    -fx-margin: 10px; /* Espacio externo */
+}
+
+.hbox-marco {
+    -fx-border-color: black;
+    -fx-border-width: 2px;
+    -fx-padding: 10px; /* Espacio interno */
+    -fx-margin: 10px; /* Espacio externo */
+}
