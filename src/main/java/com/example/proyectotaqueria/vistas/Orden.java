@@ -2,69 +2,97 @@ package com.example.proyectotaqueria.vistas;
 
 import com.example.proyectotaqueria.modelos.CategoriaDAO;
 import com.example.proyectotaqueria.modelos.ComidaDAO;
-import javafx.beans.property.SimpleStringProperty;
+import com.example.proyectotaqueria.modelos.OrdenTemporal;
+import com.example.proyectotaqueria.modelos.OrdenesManager;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class Orden extends Stage {
+    private TableView<OrdenTemporal> tableView;
+    private int numeroMesa;
+    private int idEmpleado;
 
-    private TableView<String> tableView; // Tabla para mostrar la información
-
-    public Orden() {
-        CrearUI();
-        this.setTitle("Inserciones de Usuario");
-        // No necesitas mostrar la ventana aquí, se mostrará después de configurar la escena
+    public Orden(int numeroMesa, int idEmpleado, ObservableList<OrdenTemporal> listaOrdenesTemporales) {
+        this.numeroMesa = numeroMesa;
+        this.idEmpleado = idEmpleado;
+        crearUI(listaOrdenesTemporales);
+        this.setTitle("Órdenes de Mesa " + numeroMesa);
     }
 
-    private void CrearUI() {
-        // Crear TableView para mostrar información adicional
+    private void crearUI(ObservableList<OrdenTemporal> listaOrdenesTemporales) {
         tableView = new TableView<>();
-        TableColumn<String, String> comidaColumna = new TableColumn<>("Comida");
-        TableColumn<String, String> precioColumna = new TableColumn<>("Precio");
-        TableColumn<String, String> cantidadColumna = new TableColumn<>("Cantidad");
+        TableColumn<OrdenTemporal, String> comidaColumna = new TableColumn<>("Comida");
+        TableColumn<OrdenTemporal, Float> precioColumna = new TableColumn<>("Precio");
+        TableColumn<OrdenTemporal, Integer> cantidadColumna = new TableColumn<>("Cantidad");
 
-        // Configurar las celdas de la tabla
-        comidaColumna.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
-        precioColumna.setCellValueFactory(data -> new SimpleStringProperty("<vacío>"));
-        cantidadColumna.setCellValueFactory(data -> new SimpleStringProperty("<vacío>"));
+        comidaColumna.setCellValueFactory(data -> data.getValue().nombreComidaProperty());
+        precioColumna.setCellValueFactory(data -> data.getValue().precioProperty().asObject());
+        cantidadColumna.setCellValueFactory(data -> data.getValue().cantidadProperty().asObject());
 
-        // Agregar las columnas a la tabla
         tableView.getColumns().addAll(comidaColumna, precioColumna, cantidadColumna);
+        tableView.setItems(listaOrdenesTemporales);
 
-        // Crear un TabPane para organizar las pestañas
         TabPane tabPane = new TabPane();
         tabPane.setPadding(new Insets(20));
 
-        // Obtener la lista de categorías desde la base de datos
         CategoriaDAO categoriaDAO = new CategoriaDAO();
         ObservableList<CategoriaDAO> listaCategorias = categoriaDAO.consultar();
 
-        // Crear una pestaña para cada categoría
         for (CategoriaDAO categoria : listaCategorias) {
             Tab tab = new Tab(categoria.getNombre());
             tab.setContent(crearContenidoPestana(categoria.getNombre()));
             tabPane.getTabs().add(tab);
         }
 
-        // Organizar elementos en un VBox final
-        VBox vBox = new VBox(tableView, tabPane);
-        vBox.setAlignment(Pos.CENTER);
+        Button botonAceptar = new Button("Aceptar");
+        botonAceptar.setOnAction(event -> aceptarOrden());
 
-        // Crear la escena y establecerla en la ventana
-        Scene escena = new Scene(vBox);
-        this.setScene(escena);
+// Cambiamos el nombre de la variable en este evento
+        this.setOnCloseRequest(event -> {
+            ObservableList<OrdenTemporal> ordenesTemporales = tableView.getItems();
+            if (!ordenesTemporales.isEmpty()) {
+                OrdenTemporal ultimaOrden = ordenesTemporales.get(ordenesTemporales.size() - 1);
+                // Realizar alguna acción con la última orden temporal, por ejemplo:
+                System.out.println("La última orden temporal es: " + ultimaOrden);
+            }
+        });
+
+        VBox vBox = new VBox(tableView, tabPane, botonAceptar);
+        Scene scene = new Scene(vBox);
+        this.setScene(scene);
     }
 
-    // Método para crear el contenido de cada pestaña
+    private void aceptarOrden() {
+        try {
+            // Guardar las órdenes temporales en el OrdenesManager
+            for (OrdenTemporal ordenTemporal : tableView.getItems()) {
+                OrdenesManager.getInstance().insertarOrdenTemporal(ordenTemporal);
+            }
+            // Mostrar mensaje de éxito
+            mostrarMensaje("Órdenes guardadas con éxito");
+
+            // Cerrar la ventana de órdenes
+            this.close();
+        } catch (Exception e) {
+            mostrarError("Error al guardar las órdenes", e.getMessage());
+        }
+    }
+
+
+    public OrdenTemporal getOrdenTemporal() {
+        // Devuelve la última orden temporal agregada a la tabla (si hay alguna)
+        ObservableList<OrdenTemporal> ordenesTemporales = tableView.getItems();
+        int size = ordenesTemporales.size();
+        return size > 0 ? ordenesTemporales.get(size - 1) : null;
+    }
+
+
     private GridPane crearContenidoPestana(String nombreCategoria) {
         GridPane contenidoPestana = new GridPane();
         contenidoPestana.setAlignment(Pos.CENTER);
@@ -72,18 +100,19 @@ public class Orden extends Stage {
         contenidoPestana.setVgap(10);
         contenidoPestana.setPadding(new Insets(20));
 
-        // Obtener la lista de comidas para la categoría seleccionada
         ComidaDAO comidaDAO = new ComidaDAO();
         ObservableList<ComidaDAO> listaComidas = comidaDAO.consultarPorCategoria(nombreCategoria);
 
-        // Crear y agregar botones a la pestaña
         int fila = 0;
         int columna = 0;
         for (ComidaDAO comida : listaComidas) {
             Button botonComida = new Button(comida.getNombre());
             botonComida.setOnAction(event -> {
-                // Aquí puedes agregar la lógica para agregar la comida a la tabla y a la base de datos si es necesario
+                OrdenTemporal ordenTemporal = new OrdenTemporal(idEmpleado, comida, comida.getPrecio(), 1, numeroMesa);
+                OrdenesManager.getInstance().insertarOrdenTemporal(ordenTemporal);
+                tableView.getItems().add(ordenTemporal); // Agregar la orden a la tabla
             });
+
             contenidoPestana.add(botonComida, columna, fila);
             columna++;
             if (columna == 3) {
@@ -94,4 +123,21 @@ public class Orden extends Stage {
 
         return contenidoPestana;
     }
+
+    private void mostrarMensaje(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Información");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    private void mostrarError(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
 }
+

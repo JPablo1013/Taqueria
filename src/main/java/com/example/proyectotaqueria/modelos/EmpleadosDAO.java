@@ -118,6 +118,37 @@ public class EmpleadosDAO {
         }
     }
 
+    public boolean validarNombreEmpleado(String nombreEmpleado) {
+        String query = "SELECT COUNT(*) FROM empleado WHERE nomEmpleado = '" + nombreEmpleado + "'";
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            if (res.next()) {
+                int count = res.getInt(1);
+                return count > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public int getIdEmpleadoPorNombre(String nombreEmpleado) {
+        String query = "SELECT id_Empleado FROM empleado WHERE nomEmpleado = '" + nombreEmpleado + "'";
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            if (res.next()) {
+                return res.getInt("id_Empleado");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1; // Devuelve -1 si el nombre del empleado no es válido
+    }
+
+
+
     public ObservableList<EmpleadosDAO> CONSULTAR() {
         ObservableList<EmpleadosDAO> listaEmp = FXCollections.observableArrayList();
 

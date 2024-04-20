@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.time.LocalDate;
 
 public class OrdenDAO {
 
@@ -93,9 +94,14 @@ public class OrdenDAO {
     }*/
 
     public void insertar() {
+        // Obtener la fecha actual
+        LocalDate fechaActual = LocalDate.now();
+
+        // Crear la consulta SQL con la fecha actual
         String query = "INSERT INTO orden(id_Empleado, id_Pago, fecha, id_Comida, id_Bebida, cantidad, no_mesa) " +
-                "VALUES(" + idEmpleado + "," + idPago + ",'" + fecha + "'," + idComida + "," + idBebida + "," +
+                "VALUES(" + idEmpleado + "," + idPago + ",'" + fechaActual + "'," + idComida + "," + idBebida + "," +
                 cantidad + "," + noMesa + ")";
+
         try {
             Statement stmt = Conexion.connection.createStatement();
             stmt.executeUpdate(query);

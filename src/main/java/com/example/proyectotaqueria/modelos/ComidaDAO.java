@@ -101,6 +101,24 @@ public class ComidaDAO {
         return listaComidas;
     }
 
+    public ComidaDAO obtenerComidaPorId(int idComida) {
+        ComidaDAO comida = null;
+        String query = "SELECT * FROM comida WHERE id_Comida = ?";
+        try (PreparedStatement stmt = Conexion.connection.prepareStatement(query)) {
+            stmt.setInt(1, idComida);
+            ResultSet res = stmt.executeQuery();
+            if (res.next()) {
+                comida = new ComidaDAO();
+                comida.setIdComida(res.getInt("id_Comida"));
+                comida.setNombre(res.getString("nombre"));
+                comida.setPrecio(res.getFloat("precio"));
+                comida.setIdCategoria(res.getInt("id_Categoria"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return comida;
+    }
 
     public ObservableList<ComidaDAO> consultarPorCategoria(String nombreCategoria) {
         ObservableList<ComidaDAO> listaComidas = FXCollections.observableArrayList();

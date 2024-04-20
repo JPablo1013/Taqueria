@@ -15,10 +15,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-
-
-
-
 public class HelloApplication extends Application {
 
     private BorderPane bdpPanel;
@@ -44,7 +40,7 @@ public class HelloApplication extends Application {
         TabPane tabPane = new TabPane();
 
         Tab tab1 = new Tab("Pestaña 1");
-        tab1.setContent(new Mesas(0));
+        tab1.setContent(new Mesas());
 
         Tab tab2 = new Tab("Pestaña 2");
         VBox tab2Content = new VBox();
