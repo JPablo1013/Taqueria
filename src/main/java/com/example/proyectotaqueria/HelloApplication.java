@@ -4,12 +4,14 @@ import com.example.proyectotaqueria.modelos.Conexion;
 import com.example.proyectotaqueria.modelos.UsuarioDAO;
 import com.example.proyectotaqueria.vistas.ComidaTaqueria;
 import com.example.proyectotaqueria.vistas.EmpleadoTaqueria;
+import com.example.proyectotaqueria.vistas.Graficos;
 import com.example.proyectotaqueria.vistas.Mesas;
 import com.mysql.cj.conf.ConnectionUrlParser;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -70,9 +72,28 @@ public class HelloApplication extends Application {
             }
         });
 
+        Tab tab4 = new Tab("Gráficos");
+        Pane tab4Content = new Pane();
+        Graficos graficos = new Graficos();
+        tab4Content.getChildren().add(graficos); // Añadir el objeto Graficos al Pane
+        tab4.setContent(tab4Content);
+
+
+        tabPane.getTabs().add(tab4);
+        tab4.setOnSelectionChanged(event -> {
+            if (tab4.isSelected()) {
+                if (verificarCredenciales()) {
+                    tab4Content.getChildren().add(new Graficos());
+                } else {
+                    tabPane.getSelectionModel().selectFirst();
+                }
+            }
+        });
+
         tabPane.getTabs().add(tab1);
         bdpPanel.setCenter(tabPane);
     }
+
 
     private boolean verificarCredenciales() {
         // Mostrar un cuadro de diálogo para ingresar usuario y contraseña

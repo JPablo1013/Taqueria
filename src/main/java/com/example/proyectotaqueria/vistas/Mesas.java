@@ -1,5 +1,6 @@
 package com.example.proyectotaqueria.vistas;
 
+import com.example.proyectotaqueria.modelos.ComidaDAO;
 import com.example.proyectotaqueria.modelos.Conexion;
 import com.example.proyectotaqueria.modelos.MesaDAO;
 import com.example.proyectotaqueria.modelos.OrdenTemporal;
@@ -73,7 +74,11 @@ public class Mesas extends Pane {
         try {
             ObservableList<OrdenTemporal> listaOrdenesTemporales = ordenesPorMesa.get(numeroMesa);
             int idEmpleado = 4; // Aquí debes obtener el ID del empleado actual
-            Orden orden = new Orden(numeroMesa, idEmpleado, listaOrdenesTemporales);
+
+            // Aquí creamos un objeto ComidaDAO para pasar al constructor de Orden
+            ComidaDAO comida = new ComidaDAO(); // Supongamos que necesitas crear un objeto ComidaDAO vacío por ahora
+
+            Orden orden = new Orden(numeroMesa, idEmpleado, listaOrdenesTemporales, comida);
             orden.initOwner(getScene().getWindow()); // Establecer la ventana de Mesas como propietaria de la ventana Orden
 
             orden.showAndWait(); // Mostrar la ventana de órdenes y esperar a que se cierre
@@ -84,6 +89,7 @@ public class Mesas extends Pane {
             mostrarError("Error al abrir las órdenes", e.getMessage());
         }
     }
+
 
     private void actualizarBotonMesa(int numeroMesa) {
         Button botonMesa = botonesMesas.get(numeroMesa);

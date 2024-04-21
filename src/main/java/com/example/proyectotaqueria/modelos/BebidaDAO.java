@@ -3,6 +3,7 @@ package com.example.proyectotaqueria.modelos;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class BebidaDAO {
@@ -101,4 +102,18 @@ public class BebidaDAO {
         }
         return listaBebidas;
     }
+    public boolean existeBebida(int idBebida) {
+        String query = "SELECT COUNT(*) FROM bebida WHERE id_Bebida = " + idBebida;
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            rs.next();
+            int count = rs.getInt(1);
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

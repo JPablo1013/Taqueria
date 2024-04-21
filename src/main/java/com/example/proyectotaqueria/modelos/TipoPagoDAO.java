@@ -27,7 +27,7 @@ public class TipoPagoDAO {
     }
 
     public void insertar() {
-        String query = "INSERT INTO tipo_pago(id_TipoPago, nombre) VALUES(" + idTipoPago + ",'" + nombre + "')";
+        String query = "INSERT INTO tipopago(id_TipoPago, nombre) VALUES(" + idTipoPago + ",'" + nombre + "')";
         try {
             Statement stmt = Conexion.connection.createStatement();
             stmt.executeUpdate(query);
@@ -37,7 +37,7 @@ public class TipoPagoDAO {
     }
 
     public void actualizar() {
-        String query = "UPDATE tipo_pago SET nombre='" + nombre + "' WHERE id_TipoPago=" + idTipoPago;
+        String query = "UPDATE tipopago SET nombre='" + nombre + "' WHERE id_TipoPago=" + idTipoPago;
         try {
             Statement stmt = Conexion.connection.createStatement();
             stmt.executeUpdate(query);
@@ -47,7 +47,7 @@ public class TipoPagoDAO {
     }
 
     public void eliminar() {
-        String query = "DELETE FROM tipo_pago WHERE id_TipoPago=" + idTipoPago;
+        String query = "DELETE FROM tipopago WHERE id_TipoPago=" + idTipoPago;
         try {
             Statement stmt = Conexion.connection.createStatement();
             stmt.executeUpdate(query);
@@ -59,7 +59,7 @@ public class TipoPagoDAO {
     public ObservableList<TipoPagoDAO> consultar() {
         ObservableList<TipoPagoDAO> listaTiposPago = FXCollections.observableArrayList();
 
-        String query = "SELECT * FROM tipo_pago";
+        String query = "SELECT * FROM tipopago";
         try {
             Statement stmt = Conexion.connection.createStatement();
             ResultSet res = stmt.executeQuery(query);

@@ -12,7 +12,8 @@ import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 //import com.itextpdf.layout.properties.UnitValue;
-import com.itextpdf.layout.property.UnitValue;
+//import com.itextpdf.layout.property.UnitValue;
+import com.itextpdf.layout.properties.UnitValue;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;

@@ -6,35 +6,76 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class OrdenTemporal {
     private int idEmpleado;
-    private ComidaDAO comida;
-    private SimpleStringProperty nombreComida;
+    private Object item; // Puede ser ComidaDAO o BebidaDAO
+    private SimpleStringProperty nombreItem;
     private SimpleFloatProperty precio;
     private SimpleIntegerProperty cantidad;
     private int noMesa;
+    private int idComida; // ID de la comida
+    private int idBebida; // ID de la bebida
 
-    public OrdenTemporal(int idEmpleado, ComidaDAO comida, float precio, int cantidad, int noMesa) {
+    public OrdenTemporal(int idEmpleado, Object item, float precio, int cantidad, int noMesa) {
         this.idEmpleado = idEmpleado;
-        this.comida = comida;
-        this.nombreComida = new SimpleStringProperty(comida.getNombre());
+        this.item = item;
+        this.nombreItem = new SimpleStringProperty(obtenerNombreItem());
         this.precio = new SimpleFloatProperty(precio);
         this.cantidad = new SimpleIntegerProperty(cantidad);
         this.noMesa = noMesa;
+        // Obtener los ID de la comida o bebida
+        obtenerIdItem();
     }
 
-    public String getNombreComida() {
-        return nombreComida.get();
+    public String obtenerNombreItem() {
+        if (item instanceof ComidaDAO) {
+            return ((ComidaDAO) item).getNombre();
+        } else if (item instanceof BebidaDAO) {
+            return ((BebidaDAO) item).getNombre();
+        }
+        return "";
     }
 
-    public SimpleStringProperty nombreComidaProperty() {
-        return nombreComida;
+    public void obtenerIdItem() {
+        if (item instanceof ComidaDAO) {
+            idComida = ((ComidaDAO) item).getIdComida();
+            idBebida = 0; // No hay bebida asociada
+        } else if (item instanceof BebidaDAO) {
+            idComida = 0; // No hay comida asociada
+            idBebida = ((BebidaDAO) item).getIdBebida();
+        } else {
+            throw new IllegalStateException("El objeto item no es ni una ComidaDAO ni una BebidaDAO.");
+        }
     }
 
-    public float getPrecio() {
-        return precio.get();
+    public SimpleIntegerProperty cantidadProperty() {
+        return cantidad;
     }
 
     public SimpleFloatProperty precioProperty() {
         return precio;
+    }
+
+    public SimpleStringProperty nombreItemProperty() {
+        return nombreItem;
+    }
+
+    public Object getItem() {
+        return item;
+    }
+
+    public void setIdComida(int idComida) {
+        this.idComida = idComida;
+    }
+
+    public void setIdBebida(int idBebida) {
+        this.idBebida = idBebida;
+    }
+
+    public String getNombreItem() {
+        return nombreItem.get();
+    }
+
+    public float getPrecio() {
+        return precio.get();
     }
 
     public int getIdEmpleado() {
@@ -45,16 +86,8 @@ public class OrdenTemporal {
         this.idEmpleado = idEmpleado;
     }
 
-    public int getIdComida() {
-        return comida.getIdComida();
-    }
-
     public int getCantidad() {
         return cantidad.get();
-    }
-
-    public SimpleIntegerProperty cantidadProperty() {
-        return cantidad;
     }
 
     public int getNoMesa() {
@@ -63,5 +96,13 @@ public class OrdenTemporal {
 
     public void setNoMesa(int noMesa) {
         this.noMesa = noMesa;
+    }
+
+    public int getIdComida() {
+        return idComida;
+    }
+
+    public int getIdBebida() {
+        return idBebida;
     }
 }

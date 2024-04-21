@@ -14,6 +14,8 @@ module com.example.proyectotaqueria {
     requires kernel;
     requires io;
     requires layout;
+    requires org.jfree.jfreechart;
+    requires javafx.swing;
 
     opens  com.example.proyectotaqueria.modelos;
 }

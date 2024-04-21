@@ -2,7 +2,10 @@ package com.example.proyectotaqueria.modelos;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 
@@ -156,4 +159,110 @@ public class OrdenDAO {
         }
         return listaOrdenes;
     }
+
+    public ObservableList<OrdenDAO> obtenerProductosMasVendidos() {
+        ObservableList<OrdenDAO> listaProductosMasVendidos = FXCollections.observableArrayList();
+
+        String query = "SELECT id_Comida AS id_Producto, 'Comida' AS tipo, COUNT(id_Comida) AS cantidad_ventas " +
+                "FROM orden GROUP BY id_Comida " +
+                "UNION " +
+                "SELECT id_Bebida AS id_Producto, 'Bebida' AS tipo, COUNT(id_Bebida) AS cantidad_ventas " +
+                "FROM orden GROUP BY id_Bebida";
+
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            while (res.next()) {
+                OrdenDAO producto = new OrdenDAO();
+                producto.setIdComida(res.getInt("id_Producto"));
+                producto.setIdBebida(res.getInt("id_Producto"));
+                producto.setCantidad(res.getInt("cantidad_ventas"));
+                //producto.setTipo(res.getString("tipo"));
+                listaProductosMasVendidos.add(producto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return listaProductosMasVendidos;
+    }
+
+    public ObservableList<String> obtenerEmpleadoMasVentas() {
+        ObservableList<String> empleadoMasVentas = FXCollections.observableArrayList();
+
+        String query = "SELECT e.nomEmpleado, COUNT(*) as ventas_realizadas " +
+                "FROM orden o " +
+                "JOIN empleado e ON o.id_Empleado = e.id_Empleado " +
+                "GROUP BY e.nomEmpleado " +
+                "ORDER BY ventas_realizadas DESC " +
+                "LIMIT 1";
+
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            if (res.next()) {
+                String nombreEmpleado = res.getString("nomEmpleado");
+                int ventasRealizadas = res.getInt("ventas_realizadas");
+                empleadoMasVentas.add(nombreEmpleado + ":" + ventasRealizadas);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return empleadoMasVentas;
+    }
+
+    public ObservableList<OrdenDAO> obtenerVentasPorDia() {
+        ObservableList<OrdenDAO> ventasPorDia = FXCollections.observableArrayList();
+
+        String query = "SELECT DATE(fecha) AS fecha, COUNT(*) AS cantidad_ventas FROM orden GROUP BY DATE(fecha)";
+
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            while (res.next()) {
+                OrdenDAO venta = new OrdenDAO();
+                venta.setFecha(res.getString("fecha"));
+                venta.setCantidad(res.getInt("cantidad_ventas"));
+                ventasPorDia.add(venta);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ventasPorDia;
+    }
+
+
+
+    public String getNombreComidaPorId(int idComida) {
+        String nombreComida = null;
+        String query = "SELECT nombre FROM comida WHERE id_Comida = ?";
+        try (PreparedStatement stmt = Conexion.connection.prepareStatement(query)) {
+            stmt.setInt(1, idComida);
+            ResultSet res = stmt.executeQuery();
+            if (res.next()) {
+                nombreComida = res.getString("nombre");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return nombreComida;
+    }
+
+    public String getNombreBebidaPorId(int idBebida) {
+        String nombreBebida = null;
+        String query = "SELECT nombre FROM bebida WHERE id_Bebida = ?";
+        try (PreparedStatement stmt = Conexion.connection.prepareStatement(query)) {
+            stmt.setInt(1, idBebida);
+            ResultSet res = stmt.executeQuery();
+            if (res.next()) {
+                nombreBebida = res.getString("nombre");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return nombreBebida;
+    }
+
 }

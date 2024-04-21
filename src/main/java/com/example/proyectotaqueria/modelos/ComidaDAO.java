@@ -161,4 +161,19 @@ public class ComidaDAO {
         return idCategoria;
     }
 
+    public boolean existeComida(int idComida) {
+        String query = "SELECT COUNT(*) FROM comida WHERE id_Comida = " + idComida;
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            rs.next();
+            int count = rs.getInt(1);
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 }
