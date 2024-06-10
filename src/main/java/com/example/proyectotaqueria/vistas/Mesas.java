@@ -1,32 +1,32 @@
 package com.example.proyectotaqueria.vistas;
 
-import com.example.proyectotaqueria.modelos.ComidaDAO;
-import com.example.proyectotaqueria.modelos.Conexion;
-import com.example.proyectotaqueria.modelos.MesaDAO;
-import com.example.proyectotaqueria.modelos.OrdenTemporal;
+import com.example.proyectotaqueria.modelos.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Mesas extends Pane {
-    private Map<Integer, ObservableList<OrdenTemporal>> ordenesPorMesa;
-    private Map<Integer, Button> botonesMesas;
+    protected Map<Integer, ObservableList<OrdenTemporal>> ordenesPorMesa;
+    protected Map<Integer, Button> botonesMesas;
 
     public Mesas() {
         ordenesPorMesa = new HashMap<>();
         botonesMesas = new HashMap<>();
         Conexion.crearConexion(); // Inicializar la conexión a la base de datos
+        //solicitarNombreEmpleado(); // Solicitar el nombre del empleado y obtener su ID
         crearUI(); // Crear la interfaz de usuario
     }
 
@@ -64,6 +64,11 @@ public class Mesas extends Pane {
 
     private void mesaSeleccionada(int numeroMesa) {
         abrirOrdenes(numeroMesa);
+        // Cambiar el color del botón de mesa a rojo cuando se selecciona la mesa
+        Button botonMesa = botonesMesas.get(numeroMesa);
+        if (botonMesa != null) {
+            botonMesa.setStyle("-fx-background-color: red");
+        }
     }
 
     private void abrirOrdenes(int numeroMesa) {
@@ -71,23 +76,46 @@ public class Mesas extends Pane {
         ventanaOrdenes.initModality(Modality.APPLICATION_MODAL);
         ventanaOrdenes.setTitle("Órdenes");
 
+        boolean empleadoValido = false;
+        int idEmpleado = -1;
+
+        while (!empleadoValido) {
+            // Solicitar el nombre del empleado
+            String nombreEmpleado = obtenerNombreEmpleado();
+
+            // Obtener el ID del empleado utilizando su nombre
+            idEmpleado = obtenerIdEmpleado(nombreEmpleado);
+
+            // Verificar si el ID del empleado es válido
+            if (idEmpleado != -1) {
+                empleadoValido = true;
+            }
+        }
+
         try {
             ObservableList<OrdenTemporal> listaOrdenesTemporales = ordenesPorMesa.get(numeroMesa);
-            int idEmpleado = 4; // Aquí debes obtener el ID del empleado actual
+            ComidaDAO comida = new ComidaDAO(); // Instancia vacía de ComidaDAO
+            Orden orden = new Orden(numeroMesa, idEmpleado, listaOrdenesTemporales, comida, botonesMesas);
+            orden.initOwner(getScene().getWindow());
 
-            // Aquí creamos un objeto ComidaDAO para pasar al constructor de Orden
-            ComidaDAO comida = new ComidaDAO(); // Supongamos que necesitas crear un objeto ComidaDAO vacío por ahora
-
-            Orden orden = new Orden(numeroMesa, idEmpleado, listaOrdenesTemporales, comida);
-            orden.initOwner(getScene().getWindow()); // Establecer la ventana de Mesas como propietaria de la ventana Orden
-
-            orden.showAndWait(); // Mostrar la ventana de órdenes y esperar a que se cierre
+            orden.showAndWait();
 
             // Actualizar el color del botón de la mesa después de cerrar la ventana de órdenes
             actualizarBotonMesa(numeroMesa);
         } catch (Exception e) {
             mostrarError("Error al abrir las órdenes", e.getMessage());
         }
+    }
+
+    private int obtenerIdEmpleado(String nombreEmpleado) {
+        EmpleadosDAO empleadosDAO = new EmpleadosDAO();
+        int idEmpleado = empleadosDAO.getIdEmpleadoPorNombre(nombreEmpleado);
+        if (idEmpleado == -1) {
+            // Si el ID devuelto es -1, significa que el nombre del empleado no es válido.
+            // No necesitas mostrar un mensaje de error aquí, simplemente devuelve -1.
+            return -1;
+        }
+        return idEmpleado;
     }
 
 
@@ -105,5 +133,13 @@ public class Mesas extends Pane {
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
-}
 
+    private String obtenerNombreEmpleado() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nombre del Empleado");
+        dialog.setHeaderText("Por favor, ingresa tu nombre:");
+
+        Optional<String> result = dialog.showAndWait();
+        return result.orElse(""); // Si el usuario no ingresa ningún nombre, se devuelve una cadena vacía
+    }
+}

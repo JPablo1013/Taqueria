@@ -2,6 +2,9 @@ package com.example.proyectotaqueria.modelos;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +16,16 @@ public class ComidaDAO {
     private String nombre;
     private int idCategoria;
     private float precio;
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
+
+    private String foto;
 
     public float getPrecio() {
         return precio;
@@ -46,7 +59,7 @@ public class ComidaDAO {
         this.idCategoria = idCategoria;
     }
 
-    public void insertar() {
+    /*public void insertar() {
         String query = "INSERT INTO comida(nombre, precio, id_Categoria) VALUES(?, ?, ?)";
         try (PreparedStatement stmt = Conexion.connection.prepareStatement(query)) {
             stmt.setString(1, nombre);
@@ -56,7 +69,21 @@ public class ComidaDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }*/
+
+    public void insertar(String nombreImagen) {
+        String query = "INSERT INTO comida(nombre, precio, id_Categoria, foto) VALUES(?, ?, ?, ?)";
+        try (PreparedStatement stmt = Conexion.connection.prepareStatement(query)) {
+            stmt.setString(1, nombre);
+            stmt.setFloat(2, precio);
+            stmt.setInt(3, idCategoria);
+            stmt.setString(4, nombreImagen);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
+
 
     public void actualizar() {
         String query = "UPDATE comida SET nombre=?, precio=?, id_Categoria=? WHERE id_Comida=?";
@@ -93,6 +120,7 @@ public class ComidaDAO {
                 comida.setNombre(res.getString("nombre"));
                 comida.setPrecio(res.getFloat("precio"));
                 comida.setIdCategoria(res.getInt("id_Categoria"));
+                comida.setFoto(res.getString("foto"));
                 listaComidas.add(comida);
             }
         } catch (SQLException e) {
@@ -137,6 +165,7 @@ public class ComidaDAO {
                 comida.setIdComida(res.getInt("id_Comida"));
                 comida.setNombre(res.getString("nombre"));
                 comida.setPrecio(res.getFloat("precio"));
+                comida.setFoto(res.getString("foto"));
                 comida.setIdCategoria(idCategoria);
                 listaComidas.add(comida);
             }
@@ -175,5 +204,15 @@ public class ComidaDAO {
         }
     }
 
+    public void guardarImagen(String nombreImagen) {
+        String query = "UPDATE comida SET foto = ? WHERE id_Comida = ?";
+        try (PreparedStatement stmt = Conexion.connection.prepareStatement(query)) {
+            stmt.setString(1, nombreImagen);
+            stmt.setInt(2, idComida);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

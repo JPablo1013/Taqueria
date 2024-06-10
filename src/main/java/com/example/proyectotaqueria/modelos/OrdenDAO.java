@@ -16,9 +16,9 @@ public class OrdenDAO {
     private int idPago;
     private String fecha;
     private int idComida;
-    private int idBebida;
-    private int cantidad;
     private int noMesa;
+    //private int idBebida;
+    //private int cantidad;
 
     public int getIdOrden() {
         return idOrden;
@@ -60,7 +60,7 @@ public class OrdenDAO {
         this.idComida = idComida;
     }
 
-    public int getIdBebida() {
+    /*public int getIdBebida() {
         return idBebida;
     }
 
@@ -74,7 +74,7 @@ public class OrdenDAO {
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
-    }
+    }*/
 
     public int getNoMesa() {
         return noMesa;
@@ -85,18 +85,6 @@ public class OrdenDAO {
     }
 
     /*public void insertar() {
-        String query = "INSERT INTO orden(id_Empleado, id_Pago, fecha, id_Comida, id_Bebida, cantidad, no_mesa) " +
-                "VALUES(" + idEmpleado + "," + idPago + ",'" + fecha + "'," + idComida + "," + idBebida + "," +
-                cantidad + "," + noMesa + ")";
-        try {
-            Statement stmt = Conexion.connection.createStatement();
-            stmt.executeUpdate(query);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
-    public void insertar() {
         // Obtener la fecha actual
         LocalDate fechaActual = LocalDate.now();
 
@@ -111,9 +99,25 @@ public class OrdenDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }*/
+
+    public void insertar() {
+        // Obtener la fecha actual
+        LocalDate fechaActual = LocalDate.now();
+
+        // Crear la consulta SQL con la fecha actual
+        String query = "INSERT INTO orden(id_Empleado, id_Pago, fecha, id_Comida, no_mesa) " +
+                "VALUES(" + idEmpleado + "," + idPago + ",'" + fechaActual + "'," + idComida + "," + noMesa + ")";
+
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            stmt.executeUpdate(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void actualizar() {
+    /*public void actualizar() {
         String query = "UPDATE orden SET id_Empleado=" + idEmpleado + ", id_Pago=" + idPago + ", fecha='" + fecha + "', " +
                 "id_Comida=" + idComida + ", id_Bebida=" + idBebida + ", cantidad=" + cantidad + ", no_mesa=" + noMesa +
                 " WHERE id_Orden=" + idOrden;
@@ -123,7 +127,20 @@ public class OrdenDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }*/
+
+    public void actualizar() {
+        String query = "UPDATE orden SET id_Empleado=" + idEmpleado + ", id_Pago=" + idPago + ", fecha='" + fecha + "', " +
+                "id_Comida=" + idComida + ", no_mesa=" + noMesa +
+                " WHERE id_Orden=" + idOrden;
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            stmt.executeUpdate(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
     public void eliminar() {
         String query = "DELETE FROM orden WHERE id_Orden=" + idOrden;
@@ -149,8 +166,8 @@ public class OrdenDAO {
                 orden.setIdPago(res.getInt("id_Pago"));
                 orden.setFecha(res.getString("fecha"));
                 orden.setIdComida(res.getInt("id_Comida"));
-                orden.setIdBebida(res.getInt("id_Bebida"));
-                orden.setCantidad(res.getInt("cantidad"));
+                //orden.setIdBebida(res.getInt("id_Bebida"));
+                //orden.setCantidad(res.getInt("cantidad"));
                 orden.setNoMesa(res.getInt("no_mesa"));
                 listaOrdenes.add(orden);
             }
@@ -160,7 +177,7 @@ public class OrdenDAO {
         return listaOrdenes;
     }
 
-    public ObservableList<OrdenDAO> obtenerProductosMasVendidos() {
+    /*public ObservableList<OrdenDAO> obtenerProductosMasVendidos() {
         ObservableList<OrdenDAO> listaProductosMasVendidos = FXCollections.observableArrayList();
 
         String query = "SELECT id_Comida AS id_Producto, 'Comida' AS tipo, COUNT(id_Comida) AS cantidad_ventas " +
@@ -185,7 +202,30 @@ public class OrdenDAO {
         }
 
         return listaProductosMasVendidos;
+    }*/
+
+    public ObservableList<OrdenDAO> obtenerProductosMasVendidos() {
+        ObservableList<OrdenDAO> listaProductosMasVendidos = FXCollections.observableArrayList();
+
+        String query = "SELECT id_Comida AS id_Producto, 'Comida' AS tipo, COUNT(id_Comida) AS cantidad_ventas " +
+                "FROM orden GROUP BY id_Comida";
+
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            while (res.next()) {
+                OrdenDAO producto = new OrdenDAO();
+                producto.setIdComida(res.getInt("id_Producto"));
+                //producto.setCantidad(res.getInt("cantidad_ventas"));
+                listaProductosMasVendidos.add(producto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return listaProductosMasVendidos;
     }
+
 
     public ObservableList<String> obtenerEmpleadoMasVentas() {
         ObservableList<String> empleadoMasVentas = FXCollections.observableArrayList();
@@ -223,7 +263,7 @@ public class OrdenDAO {
             while (res.next()) {
                 OrdenDAO venta = new OrdenDAO();
                 venta.setFecha(res.getString("fecha"));
-                venta.setCantidad(res.getInt("cantidad_ventas"));
+                //venta.setCantidad(res.getInt("cantidad_ventas"));
                 ventasPorDia.add(venta);
             }
         } catch (Exception e) {
@@ -250,7 +290,32 @@ public class OrdenDAO {
         return nombreComida;
     }
 
-    public String getNombreBebidaPorId(int idBebida) {
+    public static ObservableList<OrdenDAO> obtenerOrdenesTemporales(int numeroMesa) {
+        ObservableList<OrdenDAO> ordenesTemporales = FXCollections.observableArrayList();
+
+        // Realizar la consulta SQL para obtener las órdenes temporales de la mesa especificada
+        String query = "SELECT * FROM orden WHERE no_mesa = " + numeroMesa + " AND id_Pago IS NULL";
+
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            while (res.next()) {
+                OrdenDAO orden = new OrdenDAO();
+                orden.setIdOrden(res.getInt("id_Orden"));
+                orden.setIdEmpleado(res.getInt("id_Empleado"));
+                orden.setIdPago(res.getInt("id_Pago"));
+                orden.setFecha(res.getString("fecha"));
+                orden.setIdComida(res.getInt("id_Comida"));
+                orden.setNoMesa(res.getInt("no_mesa"));
+                ordenesTemporales.add(orden);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ordenesTemporales;
+    }
+
+    /*public String getNombreBebidaPorId(int idBebida) {
         String nombreBebida = null;
         String query = "SELECT nombre FROM bebida WHERE id_Bebida = ?";
         try (PreparedStatement stmt = Conexion.connection.prepareStatement(query)) {
@@ -263,6 +328,38 @@ public class OrdenDAO {
             e.printStackTrace();
         }
         return nombreBebida;
+    }*/
+    public String generarTicketUltimaOrden() {
+        String ticket = "";
+        String query = "SELECT * FROM orden ORDER BY id_Orden DESC LIMIT 1";
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            if (res.next()) {
+                int idOrden = res.getInt("id_Orden");
+                int idEmpleado = res.getInt("id_Empleado");
+                int idPago = res.getInt("id_Pago");
+                String fecha = res.getString("fecha");
+                int idComida = res.getInt("id_Comida");
+                //int cantidad = res.getInt("cantidad");
+                int noMesa = res.getInt("no_mesa");
+
+                String nombreComida = getNombreComidaPorId(idComida);
+
+                ticket = "---- Ticket de Orden ----\n";
+                ticket += "ID Orden: " + idOrden + "\n";
+                ticket += "ID Empleado: " + idEmpleado + "\n";
+                ticket += "ID Pago: " + idPago + "\n";
+                ticket += "Fecha: " + fecha + "\n";
+                ticket += "Comida: " + nombreComida + "\n";
+                //ticket += "Cantidad: " + cantidad + "\n";
+                ticket += "No. Mesa: " + noMesa + "\n";
+                ticket += "-------------------------\n";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ticket;
     }
 
 }

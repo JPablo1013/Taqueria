@@ -10,6 +10,9 @@ public class MesaDAO {
     private int noMesa;
     private boolean ocupada;
 
+    public MesaDAO() {
+    }
+
     public int getNoMesa() {
         return noMesa;
     }
@@ -25,7 +28,6 @@ public class MesaDAO {
     public void setOcupada(boolean ocupada) {
         this.ocupada = ocupada;
     }
-
 
     public void insertar() {
         String query = "INSERT INTO mesas(no_mesa, ocupada) " +
@@ -58,7 +60,7 @@ public class MesaDAO {
         }
     }
 
-    public ObservableList<MesaDAO> consultar() {
+    public static ObservableList<MesaDAO> consultar() {
         ObservableList<MesaDAO> listaMesas = FXCollections.observableArrayList();
 
         String query = "SELECT * FROM mesas";
@@ -75,5 +77,25 @@ public class MesaDAO {
             e.printStackTrace();
         }
         return listaMesas;
+    }
+
+    public static MesaDAO obtenerMesaPorNumero(int numeroMesa) {
+        String query = "SELECT * FROM mesas WHERE no_mesa = " + numeroMesa;
+        MesaDAO mesa = null;
+        try {
+            Statement stmt = Conexion.connection.createStatement();
+            ResultSet res = stmt.executeQuery(query);
+            if (res.next()) {
+                mesa = new MesaDAO();
+                mesa.setNoMesa(res.getInt("no_mesa"));
+                mesa.setOcupada(res.getBoolean("ocupada"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (mesa == null) {
+            throw new RuntimeException("No se pudo encontrar la mesa con el número: " + numeroMesa);
+        }
+        return mesa;
     }
 }

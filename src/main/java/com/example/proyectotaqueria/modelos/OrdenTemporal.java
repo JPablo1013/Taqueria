@@ -11,8 +11,13 @@ public class OrdenTemporal {
     private SimpleFloatProperty precio;
     private SimpleIntegerProperty cantidad;
     private int noMesa;
-    private int idComida; // ID de la comida
-    private int idBebida; // ID de la bebida
+    private int idComida;
+    private int idBebida;
+
+    public int getNumeroMesa() {
+        return noMesa;
+    }
+
 
     public OrdenTemporal(int idEmpleado, Object item, float precio, int cantidad, int noMesa) {
         this.idEmpleado = idEmpleado;
